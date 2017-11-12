@@ -16,9 +16,9 @@ public class Client implements Runnable {
 	private String nickname = "anonymous";
 
 	public Client(Server parent, Socket socket) throws IOException {
+		
 		this.parent = parent;
-		//je memorise le socket
-		this.socket = socket;
+		this.socket = socket; //je memorise le socket
 		this.out = new PrintWriter(socket.getOutputStream(), true);
 		this.in = new BufferedReader( new InputStreamReader(socket.getInputStream()));
 	}
@@ -34,36 +34,34 @@ public class Client implements Runnable {
 
 	@Override
 	public void run() {
-		String message;
-		//tant que l'application tourne
-		while(true) {
-			// Lire this.in pour avoir la prochaine ligne
-		try {
-			message = this.in.readLine();
-			//Le client vient de se deconnecter
-			if (message == null) {
-				//ferme le socket et le thread de polling
-				close();
-				//Prévenir al classe serveur que le client est deconnecté
-				parent.onClientDisconnected(this);
-				//On arrete le thread
-				return;
-			}
-			//log
-			//System.out.println("[Server][" + socket.getInetAddress() + "] Received message: " + message);
-			//On previent la classe server 
-			parent.onClientRawDataReceived(this, message);
-			//TODO Temporaire
-			//write("ECHO -> " + message );
-		} catch (IOException e) {
-			System.err.println("[Server][" + socket.getInetAddress() + "] Error while receiving message");
-		}
-		}
 		
+		String message;
+		
+		while(true) 
+		{
+			try
+			{
+				message = this.in.readLine();
+
+				if (message == null) {
+					
+					close(); //ferme le socket et le thread de polling
+					parent.onClientDisconnected(this); //Prévenir la classe serveur que le client est deconnecté
+					
+					return; //On arrete le thread
+				}
+				parent.onClientRawDataReceived(this, message); //On previent la classe server 
+				//write("ECHO -> " + message ); //TODO Temporaire
+			}
+			catch (IOException e) {
+				System.err.println("[Server][" + socket.getInetAddress() + "] Error while receiving message");
+			}
+		}	
 	}
 	
 	public boolean write(String data) {
-		try {
+		
+		try{
 			this.out.println(data);
 			return true;
 		}
@@ -73,17 +71,17 @@ public class Client implements Runnable {
 	}
 	
 	public boolean close() {
+		
 		try {
-			//arreter le thread
-			this.thread.interrupt();
-			//fermer les flux
-			this.in.close();
-			this.out.close();
-			//fermer le socket
-			this.socket.close();
+			this.thread.interrupt();  //arreter le thread
+			this.in.close(); //fermer les flux
+			this.out.close(); 
+			this.socket.close(); //fermer le socket
+			
 			return true;
 		}
 		catch (Exception ex){
+			
 			return false;
 		}
 	}
@@ -92,7 +90,7 @@ public class Client implements Runnable {
 		return this.nickname;
 	}
 
-	public void setNickname(String substring, String nickname) {
+	public void setNickname(String nickname) {
 		this.nickname = nickname;
 		
 	}

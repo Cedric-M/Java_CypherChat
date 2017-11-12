@@ -24,10 +24,9 @@ public class Server implements Runnable {
 	}
 	
 	public void start() throws IOException {
-		// On ouvre le socket sur le port donnée
-		this.socket = new ServerSocket(this.port);
-		// On fabrique un thread qui va boucler en permanence et accepter les nouvelles connexions.
-		this.acceptThread = new Thread(this);
+		
+		this.socket = new ServerSocket(this.port); // On ouvre le socket sur le port donnée
+		this.acceptThread = new Thread(this); // On fabrique un thread qui va boucler en permanence et accepter les nouvelles connexions.
 		this.acceptThread.start();
 		// Log
 		System.out.println("[Server] Listening at port " + this.port);
@@ -35,8 +34,9 @@ public class Server implements Runnable {
 
 	@Override
 	public void run() {
-		// On boucle indéfiniement
-		while (true) {
+
+		while (true) 
+		{
 			try {
 				// Cette méthode sert à attendre la connexion d'un nouveau client. Elle bloquera jusqu'à l'arrivée
 				// d'une connexion. Quand un client se connectera,la méthode renverra le socket de connexion au client.
@@ -62,8 +62,9 @@ public class Server implements Runnable {
 	}
 	public void onClientDisconnected(Client client) {
 		System.out.println("[Server][" + client.getSocket().getInetAddress() + "] Client has just been disconnected");
-		//Retirer le client de la liste des clients connectés
-		synchronized (this.connectedClients) {
+		
+		synchronized (this.connectedClients)  //Retirer le client de la liste des clients connectés
+		{ 
 			this.connectedClients.remove(client);
 		}
 		
@@ -78,24 +79,26 @@ public class Server implements Runnable {
 		String opcode = message.substring(0,4);
 		
 		switch(opcode) {
+		
 		case "MSG;" :
 			//propager le message à tous les clients
 			broadcastMessage(client, message.substring(4));
 			break;
+			
 		case "NCK;" :
 			//changer le nickname du client, recupere tout les caractère à partir du 5eme caractere
-			client.setNickname(message.substring(4), opcode);
+			client.setNickname(message.substring(4));
 			System.out.println("Nickname changed:" + client.getNickname());
 			break;
+			
 		default :
 			System.err.println("[Server] Invalid OPCODE:" + opcode);
 			return;
 		}
 		
-		//propager le message à tous les clients
-		broadcastMessage(client, message);
 	}
 	public void broadcastMessage(Client client, String message){
+		
 		//Protocole
 		String data = "MSG;";
 		data += client.getNickname();
@@ -105,9 +108,10 @@ public class Server implements Runnable {
 		data += client.getSocket().getInetAddress();
 		data += ";";
 		data += message;
-		//Broadcast
+		
 		broadcast(data);
 	}
+	
 	public void broadcast(String message){
 		
 		ArrayList<Client> copy;
@@ -121,10 +125,6 @@ public class Server implements Runnable {
 			//Et on leurs envoie le message
 			client.write(message);
 		}
-		
 	}
-	
-	
-	
-	
+
 }
